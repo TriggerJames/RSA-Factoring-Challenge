@@ -1,0 +1,65 @@
+#!/usr/bin/node
+
+const fs = require('fs');
+
+// Function to check if a number is prime
+
+function isPrime (n) {
+  if (n <= 1) return false;
+  if (n <= 3) return true;
+  if (n % 2 === 0 || n % 3 === 0) return false;
+  for (let i = 5; i * i <= n; i += 6) {
+    if (n % i === 0 || n % (i + 2) === 0) return false;
+  }
+  return true;
+}
+
+// Function to find the prime factors of a number
+
+function findPrimeFactors (n) {
+  for (let i = 2; i <= Math.sqrt(n); i++) {
+    if (n % i === 0 && isPrime(i) && isPrime(n / i)) {
+      return [i, n / i];
+    }
+  }
+  return [null, null];
+}
+
+// Function to process the file and find prime factors
+
+function processFile (filePath) {
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error(`Error reading file: ${err.message}`);
+      process.exit(1);
+    }
+
+    const num = parseInt(data.trim(), 10);
+    if (isNaN(num)) {
+      console.error('Error: The file contains invalid data.');
+      process.exit(1);
+    }
+
+    const [p, q] = findPrimeFactors(num);
+    if (p !== null && q !== null) {
+      console.log(`${num}=${p}*${q}`);
+    } else {
+      console.log(`Failed to factorize ${num}`);
+    }
+  });
+}
+
+// Main function to handle command line arguments and call the processing function
+
+function main () {
+  const args = process.argv.slice(2);
+  if (args.length !== 1) {
+    console.error('Usage: rsa <file>');
+    process.exit(1);
+  }
+
+  const filePath = args[0];
+  processFile(filePath);
+}
+
+main();

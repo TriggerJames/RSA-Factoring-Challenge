@@ -1,0 +1,45 @@
+#!/usr/bin/node
+
+const fs = require('fs');
+
+function factorize(n) {
+    for (let i = 2; i <= Math.sqrt(n); i++) {
+        if (n % i === 0) {
+            return [i, Math.floor(n / i)];
+        }
+    }
+    return [n, 1];
+}
+
+function processFile(filePath) {
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error(`Error reading file: ${err.message}`);
+            process.exit(1);
+        }
+
+        const lines = data.trim().split('\n');
+        lines.forEach(line => {
+            const num = parseInt(line, 10);
+            if (isNaN(num)) {
+                console.error(`Error: Invalid number '${line}' in the file.`);
+                process.exit(1);
+            }
+            const [p, q] = factorize(num);
+            console.log(`${num}=${p}*${q}`);
+        });
+    });
+}
+
+function main() {
+    const args = process.argv.slice(2);
+    if (args.length !== 1) {
+        console.error("Usage: factors <file>");
+        process.exit(1);
+    }
+
+    const filePath = args[0];
+    processFile(filePath);
+}
+
+main();
