@@ -1,65 +1,48 @@
 #!/usr/bin/node
 
 const fs = require('fs');
+const path = require('path');
 
-// Function to check if a number is prime
+// Function to factorize a number
 
-function isPrime (n) {
-  if (n <= 1) return false;
-  if (n <= 3) return true;
-  if (n % 2 === 0 || n % 3 === 0) return false;
-  for (let i = 5; i * i <= n; i += 6) {
-    if (n % i === 0 || n % (i + 2) === 0) return false;
+function factorize (number) {
+  if (number % 2 === 0) {
+    console.log(`${number}=${number / 2}*2`);
+    return;
   }
-  return true;
-}
-
-// Function to find the prime factors of a number
-
-function findPrimeFactors (n) {
-  for (let i = 2; i <= Math.sqrt(n); i++) {
-    if (n % i === 0 && isPrime(i) && isPrime(n / i)) {
-      return [i, n / i];
+  for (let i = 3; i <= Math.floor(number / 2); i += 2) {
+    if (number % i === 0) {
+      console.log(`${number}=${number / i}*${i}`);
+      return;
     }
   }
-  return [null, null];
+  console.log(`${number}=${number}*1`);
 }
 
-// Function to process the file and find prime factors
+// Main function to process the file
 
 function processFile (filePath) {
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    if (err) {
-      console.error(`Error reading file: ${err.message}`);
-      process.exit(1);
-    }
+  try {
+    const data = fs.readFileSync(filePath, 'utf8');
+    const numbers = data.split('\n').filter(line => line.trim() !== '').map(Number);
 
-    const num = parseInt(data.trim(), 10);
-    if (isNaN(num)) {
-      console.error('Error: The file contains invalid data.');
-      process.exit(1);
-    }
-
-    const [p, q] = findPrimeFactors(num);
-    if (p !== null && q !== null) {
-      console.log(`${num}=${p}*${q}`);
-    } else {
-      console.log(`Failed to factorize ${num}`);
-    }
-  });
-}
-
-// Main function to handle command line arguments and call the processing function
-
-function main () {
-  const args = process.argv.slice(2);
-  if (args.length !== 1) {
-    console.error('Usage: rsa <file>');
-    process.exit(1);
+    numbers.forEach(num => {
+      if (num > 1) {
+        factorize(num);
+      }
+    });
+  } catch (err) {
+    console.error(`Error reading file: ${err.message}`);
   }
-
-  const filePath = args[0];
-  processFile(filePath);
 }
 
-main();
+// Check if file path is provided
+
+const filePath = process.argv[2];
+if (!filePath) {
+  console.error('Usage: node factorize.js <file>');
+  process.exit(1);
+}
+
+const absolutePath = path.resolve(filePath);
+processFile(absolutePath);
